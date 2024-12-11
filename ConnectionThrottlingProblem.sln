@@ -1,0 +1,23 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConnectionThrottlingProblem", "ConnectionThrottlingProblem\ConnectionThrottlingProblem.csproj", "{CEEBBAB7-25B7-43F4-A3F7-8D1E422D9AE4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Env", "Env", "{39F60FBE-B087-41C7-90C5-5F45F22A49AF}"
+	ProjectSection(SolutionItems) = preProject
+		Env\run.ps1 = Env\run.ps1
+		Env\sshd_config = Env\sshd_config
+		Env\Dockerfile = Env\Dockerfile
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CEEBBAB7-25B7-43F4-A3F7-8D1E422D9AE4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CEEBBAB7-25B7-43F4-A3F7-8D1E422D9AE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CEEBBAB7-25B7-43F4-A3F7-8D1E422D9AE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CEEBBAB7-25B7-43F4-A3F7-8D1E422D9AE4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
