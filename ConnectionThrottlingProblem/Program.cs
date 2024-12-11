@@ -18,9 +18,8 @@ namespace ConnectionThrottlingProblem
 			const int count = 150;
 			var random = new Random();
 			
-			var connectionPool = new SftpConnectionPool(20, "localhost", 2222, "user", "pass");
-			if (!connectionPool.IsInitialized)
-				await connectionPool.InitializeAsync(connectionPool.MaxPoolSize / 2);
+			var connectionPool = new SftpConnectionPool(2, "localhost", 2222, "user", "pass");
+			await connectionPool.InitializeAsync(connectionPool.MaxPoolSize / 2);
 			
 			try 
 			{	

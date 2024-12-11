@@ -9,9 +9,10 @@ namespace ConnectionThrottlingProblem
 	public sealed class SftpConnectionPool : IDisposable
 	{
 		private const int MaxConnectionAttempts = 5;
-	
+		private const int MaxDelayBetweenConnectionAttemptsInMs = 180000; // 3 minutes
+		
 		private readonly SemaphoreSlim _poolLock = new SemaphoreSlim(1, 1);
-		private readonly ConcurrentStack<SftpClient> _pool = new ConcurrentStack<SftpClient>();
+		private readonly ConcurrentQueue<SftpClient> _pool = new ConcurrentQueue<SftpClient>();
 		private readonly ConnectionInfo _connectionInfo;
 		
 		public int MaxPoolSize { get; }
@@ -67,7 +68,7 @@ namespace ConnectionThrottlingProblem
 				for (var i = 0; i < count; i++)
 				{
 					var client = await CreateClientAndConnectAsync();
-					_pool.Push(client);
+					_pool.Enqueue(client);
 				}
 				
 				IsInitialized = true;
@@ -103,7 +104,7 @@ namespace ConnectionThrottlingProblem
 
 		private bool TryGetClientFromPool(out SftpClient client)
 		{
-			if (_pool.TryPop(out client)) 
+			if (_pool.TryDequeue(out client)) 
 			{
 				if (client.IsConnected)
 				{
@@ -117,18 +118,22 @@ namespace ConnectionThrottlingProblem
 
 		private async Task<SftpClient> CreateClientAndConnectAsync()
 		{
+			var random = new Random();
 			var attemptCount = 0;
 			while (true)
 			{
+				SftpClient client = null;
 				try
 				{
-					var client = new SftpClient(_connectionInfo);
+					client = new SftpClient(_connectionInfo);
 					client.KeepAliveInterval = TimeSpan.FromSeconds(60); 
 					await client.ConnectAsync(CancellationToken.None);
 					return client;
 				}
 				catch (Exception ex)
 				{
+					client?.Dispose();
+					
 					if (attemptCount++ >= MaxConnectionAttempts)
 					{
 						await Console.Out.WriteLineAsync($"Sftp connection could not be established. Exception: {ex.Message}");
@@ -136,7 +141,7 @@ namespace ConnectionThrottlingProblem
 					}
 
 					await Console.Out.WriteLineAsync($"Unable to connect to {_connectionInfo.Host}:{_connectionInfo.Port}. Retrying...");
-					var millisecondsDelay = (int)Math.Pow(attemptCount, attemptCount);
+					var millisecondsDelay = Math.Min(attemptCount * random.Next(300, 3000), MaxDelayBetweenConnectionAttemptsInMs);
 					await Task.Delay(millisecondsDelay);
 				}
 			}
@@ -148,7 +153,7 @@ namespace ConnectionThrottlingProblem
 
             if (_pool.Count < MaxPoolSize && client.IsConnected)
 			{
-				_pool.Push(client);
+				_pool.Enqueue(client);
 			}
 			else
 			{
@@ -162,7 +167,7 @@ namespace ConnectionThrottlingProblem
 
 		public void Dispose()
 		{
-			while (_pool.TryPop(out var client))
+			while (_pool.TryDequeue(out var client))
 			{
 				client.Disconnect();
 				client.Dispose();
