@@ -95,7 +95,7 @@ namespace ConnectionThrottlingProblem
 					Interlocked.Increment(ref _connectionsReused);
 					return true;
 				}
-				(connection as IDisposable)?.Dispose();
+				connection?.Dispose();
 			}
 			return false;
 		}
@@ -116,7 +116,7 @@ namespace ConnectionThrottlingProblem
 				}
 				catch (Exception ex)
 				{
-					(connection as IDisposable)?.Dispose();
+					connection?.Dispose();
 					
 					if (failedAttempts++ >= MaxFailedOpenAttempts)
 					{
@@ -143,7 +143,7 @@ namespace ConnectionThrottlingProblem
 			{
 				Interlocked.Increment(ref _connectionsDisposed);
 				await connection.CloseAsync();
-				(connection as IDisposable)?.Dispose();
+				connection.Dispose();
 			}
 		}
 
@@ -152,7 +152,7 @@ namespace ConnectionThrottlingProblem
 			while (_pool.TryDequeue(out var connection))
 			{
 				connection.CloseAsync().RunSynchronously();
-				(connection as IDisposable)?.Dispose();
+				connection.Dispose();
 			}
 			
 			_poolLock?.Dispose();

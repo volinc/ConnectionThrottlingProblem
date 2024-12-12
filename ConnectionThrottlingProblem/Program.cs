@@ -3,7 +3,7 @@ using ConnectionThrottlingProblem;
 var threadSafeSftpClientFactory = new ThreadSafeSftpClientFactory("localhost", 2222, "user", "pass");
 var connectionPool = new ConnectionPool<ThreadSafeSftpClient>(threadSafeSftpClientFactory.Create);
 await connectionPool.InitializeAsync(connectionPool.MaxPoolSize / 2);
-			
+
 try 
 {	
 	const int count = 10;

@@ -1,6 +1,6 @@
 namespace ConnectionThrottlingProblem
 {
-    public interface IConnection
+    public interface IConnection : IDisposable
     {
         bool IsOpen { get; }
         Task OpenAsync(CancellationToken cancellationToken = default);

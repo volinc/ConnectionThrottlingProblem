@@ -2,7 +2,7 @@ using Renci.SshNet;
 
 namespace ConnectionThrottlingProblem
 {
-    public sealed class ThreadSafeSftpClient : IConnection, IDisposable
+    public sealed class ThreadSafeSftpClient : IConnection
     {
         private readonly SftpClient _client;
 
