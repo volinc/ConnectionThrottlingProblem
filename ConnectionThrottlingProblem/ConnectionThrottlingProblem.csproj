@@ -2,10 +2,10 @@
 
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
-        <ImplicitUsings>disable</ImplicitUsings>
+        <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>disable</Nullable>
         <OutputType>Exe</OutputType>
-        <LangVersion>7.3</LangVersion>
+        <LangVersion>default</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
