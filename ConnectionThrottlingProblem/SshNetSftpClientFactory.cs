@@ -2,11 +2,11 @@ using Renci.SshNet;
 
 namespace ConnectionThrottlingProblem
 {
-    public sealed class ThreadSafeSftpClientFactory
+    public sealed class SshNetSftpClientFactory
     {
         private readonly ConnectionInfo _connectionInfo;
         
-        public ThreadSafeSftpClientFactory(string host, int port, string username, string password)
+        public SshNetSftpClientFactory(string host, int port, string username, string password)
         {
             ArgumentNullException.ThrowIfNull(host);
             if (port < 0)
@@ -30,11 +30,11 @@ namespace ConnectionThrottlingProblem
             _connectionInfo = new ConnectionInfo(host, port, username, passwordAuth, keyboardInteractiveAuth);
         }
         
-        public ThreadSafeSftpClient Create()
+        public IFtpClient Create()
         {
             var client = new SftpClient(_connectionInfo);
             client.KeepAliveInterval = TimeSpan.FromSeconds(60); 
-            return new ThreadSafeSftpClient(client);
+            return new SshNetSftpClient(client);
         }
     }
 }

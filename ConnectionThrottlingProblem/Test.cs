@@ -2,7 +2,41 @@ namespace ConnectionThrottlingProblem;
 
 public static class Test
 {
-    public static async Task WorkAsync(ConnectionPool<ThreadSafeSftpClient> connectionPool, string directoryPath, int i)
+    private static readonly Random Random = new();
+
+    public static async Task RunAsync(ConnectionPool<IFtpClient> connectionPool, int warmUpPoolSize = 10,
+        int tasksCount = 50,
+        string directoryPath = "/uploads")
+    {
+        try
+        {
+            await connectionPool.WarmUpAsync(warmUpPoolSize);
+
+            var tasks = Enumerable.Range(0, tasksCount).Select(i =>
+            {
+                return Task.Run(async () =>
+                {
+                    await Task.Delay(Random.Next(100));
+                    await WorkAsync(connectionPool, directoryPath, i);
+                });
+            });
+            
+            await Task.WhenAll(tasks);
+            await DeleteAllFilesAsync(connectionPool, directoryPath);
+        }
+        catch (Exception ex)
+        {
+            await Console.Out.WriteLineAsync(ex.Message);
+        }
+        finally
+        {
+            await Console.Out.WriteLineAsync($"Current pool size [{connectionPool.CurrentPoolSize}]");
+            await Console.Out.WriteLineAsync($"Clients reused [{connectionPool.ConnectionsReused}]");
+            await Console.Out.WriteLineAsync($"Clients disposed [{connectionPool.ConnectionsDisposed}]");
+        }
+    }
+
+    private static async Task WorkAsync(ConnectionPool<IFtpClient> connectionPool, string directoryPath, int i)
     {
         var client = await connectionPool.GetAsync();
         try
@@ -43,8 +77,8 @@ public static class Test
         var random = new Random();
         return new string(Enumerable.Range(0, length).Select(_ => chars[random.Next(chars.Length)]).ToArray());
     }
-    
-    public static async Task DeleteAllFilesAsync(ConnectionPool<ThreadSafeSftpClient> connectionPool, string directoryPath)
+
+    private static async Task DeleteAllFilesAsync(ConnectionPool<IFtpClient> connectionPool, string directoryPath)
     {
         var client = await connectionPool.GetAsync();
         try

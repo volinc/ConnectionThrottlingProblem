@@ -2,11 +2,15 @@ using Renci.SshNet;
 
 namespace ConnectionThrottlingProblem
 {
-    public sealed class ThreadSafeSftpClient : IConnection
+    /// <summary>
+    /// This class should implement "thread-safe" access to SftpClient.
+    /// At the moment it simply implements the methods necessary for testing purposes.
+    /// </summary>
+    public sealed class SshNetSftpClient : IFtpClient
     {
         private readonly SftpClient _client;
 
-        public ThreadSafeSftpClient(SftpClient client)
+        public SshNetSftpClient(SftpClient client)
         {
             ArgumentNullException.ThrowIfNull(client);
             
@@ -40,10 +44,10 @@ namespace ConnectionThrottlingProblem
             _client.Dispose();
         }
 
-        public List<FileInfo> ListDirectory(string path)
+        public List<FileSystemItem> ListDirectory(string path)
         {
             var sftpFiles = _client.ListDirectory(path);
-            return sftpFiles.Select(x => new FileInfo(x.Name, x.FullName, x.IsDirectory)).ToList();
+            return sftpFiles.Select(x => new FileSystemItem(x.Name, x.FullName, x.Length, x.IsDirectory)).ToList();
         }
         
         public async Task<string> ReadAllTextAsync(string path, CancellationToken cancellationToken = default)

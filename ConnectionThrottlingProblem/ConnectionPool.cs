@@ -11,11 +11,12 @@ namespace ConnectionThrottlingProblem
 		private readonly ConcurrentQueue<T> _pool = new();
 		private readonly Random _random = new();
 		
-		public int CurrentPoolSize => _pool.Count;
-		public int ConnectionsReused => _connectionsReused;
 		private int _connectionsReused;
-		public int ConnectionsDisposed => _connectionsDisposed;
 		private int _connectionsDisposed;
+		
+		internal int CurrentPoolSize => _pool.Count;
+		internal int ConnectionsReused => _connectionsReused;
+		internal int ConnectionsDisposed => _connectionsDisposed;
 		
 		public ConnectionPool(ConnectionPoolSettings settings, Func<T> factory)
 		{
