@@ -17,12 +17,19 @@ namespace ConnectionThrottlingProblem
 
         public async Task OpenAsync(CancellationToken cancellationToken = default)
         {
+            if (_client.IsConnected)
+                return;
+                
             await _client.ConnectAsync(cancellationToken);
         }
 
         public Task CloseAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            
+            if (!_client.IsConnected)
+                return Task.CompletedTask;
+            
             _client.Disconnect();
             return Task.CompletedTask;
         }
@@ -41,6 +48,8 @@ namespace ConnectionThrottlingProblem
         
         public async Task<string> ReadAllTextAsync(string path, CancellationToken cancellationToken = default)
         {
+            await Task.Delay(2000, cancellationToken);
+            
             using var output = new MemoryStream();
             await DownloadFileAsync(path, output, cancellationToken);
             output.Position = 0;

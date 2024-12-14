@@ -1,12 +1,17 @@
 using ConnectionThrottlingProblem;
 
 var threadSafeSftpClientFactory = new ThreadSafeSftpClientFactory("localhost", 2222, "user", "pass");
-var connectionPool = new ConnectionPool<ThreadSafeSftpClient>(threadSafeSftpClientFactory.Create);
-await connectionPool.InitializeAsync(connectionPool.MaxPoolSize / 2);
+var connectionPoolSettings = new ConnectionPoolSettings
+{
+	MaxPoolSize = 2,
+	MaxConcurrentConnections = 1,
+};
+var connectionPool = new ConnectionPool<ThreadSafeSftpClient>(connectionPoolSettings, threadSafeSftpClientFactory.Create);
+await connectionPool.WarmUpAsync(10);
 
 try 
 {	
-	const int count = 10;
+	const int count = 50;
 	const string directoryPath = "/uploads";
 	var random = new Random();
 	
@@ -14,7 +19,7 @@ try
 	{
 		return Task.Run(async () =>
 		{
-			await Task.Delay(i * random.Next(100, 1000));
+			await Task.Delay(random.Next(100));
 			await Test.WorkAsync(connectionPool, directoryPath, i);
 		});
 	});
